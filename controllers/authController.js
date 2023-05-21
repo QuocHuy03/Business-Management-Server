@@ -85,7 +85,7 @@ exports.login = async (req, res, next) => {
       },
     };
 
-    jwt.sign(payload, "LeQuocHuy", { expiresIn: "24h" }, (err, token) => {
+    jwt.sign(payload, "LeQuocHuy", { expiresIn: "7200" }, (err, token) => {
       if (err) {
         return res
           .status(200)
@@ -102,4 +102,16 @@ exports.login = async (req, res, next) => {
       .status(500)
       .json({ status: false, message: "Lỗi trong quá trình đăng nhập" });
   }
+};
+
+exports.verifyAccessToken = async (req, res, next) => {
+  const accessToken = req.headers.authorization.split(" ")[1];
+  jwt.verify(accessToken, "LeQuocHuy", (err, decoded) => {
+    if (err) {
+      res.status(401).json({ message: "Unauthorized" });
+    } else {
+      const { username, level } = decoded;
+      res.json({ username, level });
+    }
+  });
 };
