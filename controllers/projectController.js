@@ -30,8 +30,8 @@ exports.addProject = (req, res, next) => {
 };
 
 exports.getProjects = async (req, res, next) => {
-  const products = await Project.find({});
-  res.status(200).json(products);
+  const project = await Project.find({});
+  res.status(200).json(project);
 };
 
 exports.getIdProject = async (req, res, next) => {
@@ -56,7 +56,7 @@ exports.putProject = async (req, res, next) => {
     })
     .then((result) => {
       res.status(200).json({
-        status: "1",
+        status: true,
         message: "Cập Nhật Project Thành Công",
         project: result,
       });
@@ -69,14 +69,15 @@ exports.putProject = async (req, res, next) => {
     });
 };
 
-exports.deleteCategory = (req, res, next) => {
-  const cateId = req.params.cateId;
-  Category.deleteOne({ _id: cateId })
+exports.deleteProject = (req, res, next) => {
+  const _id = req.params.id;
+  Project.deleteOne({ _id: _id })
     .then((post) => {
+
       if (post.deletedCount > 0) {
         res
           .status(200)
-          .json({ status: true, message: "Xóa Danh Mục Thành Công" });
+          .json({ status: true, message: "Xóa Project Thành Công" });
       } else {
         const error = new Error("Không tìm thấy danh mục này");
         error.statusCode = 404;
