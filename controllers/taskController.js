@@ -98,9 +98,9 @@ exports.deleteTask = (req, res, next) => {
           .status(200)
           .json({ status: true, message: "Xóa Project Thành Công" });
       } else {
-        const error = new Error("Không tìm thấy danh mục này");
-        error.statusCode = 404;
-        throw error;
+        res
+        .status(200)
+        .json({ status: false, message: "Không tìm thấy danh mục này" });
       }
     })
     .catch((err) => {
