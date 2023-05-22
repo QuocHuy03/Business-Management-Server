@@ -1,14 +1,22 @@
 const Project = require("../models/Project");
 
 exports.addProject = (req, res, next) => {
-  const { nameProject, teamSize, dateOfStart } = req.body;
-  if (nameProject == "" || teamSize == "" || dateOfStart == "") {
+  const { nameProject, teamSize, dateOfStart, budget, status } = req.body;
+  if (
+    nameProject == "" ||
+    teamSize == "" ||
+    dateOfStart == "" ||
+    budget == "" ||
+    status == ""
+  ) {
     res.status(200).json({ status: false, message: "Không Được Để Trống" });
   } else {
     const project = new Project({
       nameProject,
       teamSize,
       dateOfStart,
+      budget,
+      status,
     });
     project
       .save()
@@ -30,8 +38,17 @@ exports.addProject = (req, res, next) => {
 };
 
 exports.getProjects = async (req, res, next) => {
-  const project = await Project.find({});
-  res.status(200).json(project);
+  const selectedValue = req.query.selectedValue;
+  console.log(selectedValue);
+  let projects;
+
+  if (selectedValue) {
+    projects = await Project.findOne({ _id: selectedValue });
+  } else {
+    projects = await Project.find({});
+  }
+
+  res.status(200).json(projects);
 };
 
 exports.getIdProject = async (req, res, next) => {
@@ -46,12 +63,15 @@ exports.getIdProject = async (req, res, next) => {
 
 exports.putProject = async (req, res, next) => {
   const _id = req.params.id;
-  const { nameProject, teamSize, dateOfStart } = req.body;
+  const { nameProject, teamSize, dateOfStart, budget, status } = req.body;
   Project.findById(_id)
     .then((huyit) => {
       huyit.nameProject = nameProject;
       huyit.teamSize = teamSize;
       huyit.dateOfStart = dateOfStart;
+      huyit.budget = budget;
+      huyit.status = status;
+
       return huyit.save();
     })
     .then((result) => {
@@ -73,7 +93,6 @@ exports.deleteProject = (req, res, next) => {
   const _id = req.params.id;
   Project.deleteOne({ _id: _id })
     .then((post) => {
-
       if (post.deletedCount > 0) {
         res
           .status(200)

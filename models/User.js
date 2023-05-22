@@ -12,14 +12,15 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
+    area: { type: mongoose.Schema.Types.ObjectId, ref: "Areas" },
     email: {
       type: String,
       required: true,
     },
     level: {
       type: String,
-      enum: ["member", "admin"],
-      default: "member",
+      enum: ["leader", "employee"],
+      default: "employee",
     },
   },
   {

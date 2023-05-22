@@ -17,10 +17,7 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
-    assignedTo: {
-      type: String,
-      required: true,
-    },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
     status: {
       type: String,
       required: true,

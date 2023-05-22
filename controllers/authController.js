@@ -3,8 +3,8 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
 exports.register = async (req, res, next) => {
-  const { username, email, password } = req.body;
-  if (username === "" || email === "" || password === "") {
+  const { username, email, password, area } = req.body;
+  if (username === "" || email === "" || password === "" || area === "") {
     return res
       .status(200)
       .json({ status: false, message: "Vui lòng nhập đầy đủ thông tin" });
@@ -22,6 +22,7 @@ exports.register = async (req, res, next) => {
       const newUser = new User({
         username,
         email,
+        area,
         password: hashedPassword,
       });
       const savedUser = await newUser.save();
@@ -30,6 +31,7 @@ exports.register = async (req, res, next) => {
         user: {
           id: savedUser._id,
           username,
+          area,
           email,
         },
       };
@@ -75,12 +77,14 @@ exports.login = async (req, res, next) => {
         .status(200)
         .json({ status: false, message: "Mật khẩu không đúng" });
     }
-
+    const userArea = await User.find({}).populate("area", "nameArea");
+    console.log(userArea);
     const payload = {
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
+        area: userArea[0].area.nameArea,
         level: user.level,
       },
     };
@@ -110,8 +114,14 @@ exports.verifyAccessToken = async (req, res, next) => {
     if (err) {
       res.status(401).json({ message: "Unauthorized" });
     } else {
-      const { username, level } = decoded;
-      res.json({ username, level });
+      console.log(decoded);
+      const { user } = decoded;
+      res.json(user);
     }
   });
+};
+
+exports.getUsers = async (req, res, next) => {
+  const users = await User.find({});
+  res.status(200).json(users);
 };

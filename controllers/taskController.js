@@ -42,7 +42,9 @@ exports.addTask = (req, res, next) => {
 
 exports.getTasks = async (req, res, next) => {
   try {
-    const tasks = await Task.find({}).populate("idProject", "nameProject");
+    const tasks = await Task.find({})
+      .populate("idProject", "nameProject")
+      .populate("assignedTo", "username");
     res.status(200).json(tasks);
   } catch (error) {
     console.error(error);
@@ -99,8 +101,8 @@ exports.deleteTask = (req, res, next) => {
           .json({ status: true, message: "Xóa Project Thành Công" });
       } else {
         res
-        .status(200)
-        .json({ status: false, message: "Không tìm thấy danh mục này" });
+          .status(200)
+          .json({ status: false, message: "Không tìm thấy danh mục này" });
       }
     })
     .catch((err) => {

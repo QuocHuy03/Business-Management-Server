@@ -16,6 +16,14 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
+    budget: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
