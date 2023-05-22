@@ -41,17 +41,22 @@ exports.addProject = (req, res, next) => {
 exports.getProjects = async (req, res, next) => {
   const selectedValue = req.query.huydev;
   // console.log(selectedValue);
-  let projects;
+  let huydev;
 
   if (selectedValue) {
-    projects = await Task.findOne({ idProject: selectedValue }).populate(
-      "idProject"
-    );
+    huydev = await Task.findOne({ idProject: selectedValue }).populate([
+      {
+        path: "idProject",
+      },
+      {
+        path: "assignedTo",
+      },
+    ]);
   } else {
-    projects = await Project.find({});
+    huydev = await Project.find({});
   }
 
-  res.status(200).json(projects);
+  res.status(200).json(huydev);
 };
 
 exports.getIdProject = async (req, res, next) => {
