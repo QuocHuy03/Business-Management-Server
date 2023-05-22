@@ -1,4 +1,5 @@
 const Project = require("../models/Project");
+const Task = require("../models/Task");
 
 exports.addProject = (req, res, next) => {
   const { nameProject, teamSize, dateOfStart, budget, status } = req.body;
@@ -38,12 +39,14 @@ exports.addProject = (req, res, next) => {
 };
 
 exports.getProjects = async (req, res, next) => {
-  const selectedValue = req.query.selectedValue;
-  console.log(selectedValue);
+  const selectedValue = req.query.huydev;
+  // console.log(selectedValue);
   let projects;
 
   if (selectedValue) {
-    projects = await Project.findOne({ _id: selectedValue });
+    projects = await Task.findOne({ idProject: selectedValue }).populate(
+      "idProject"
+    );
   } else {
     projects = await Project.find({});
   }
