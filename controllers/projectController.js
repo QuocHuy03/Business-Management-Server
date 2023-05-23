@@ -2,13 +2,15 @@ const Project = require("../models/Project");
 const Task = require("../models/Task");
 
 exports.addProject = (req, res, next) => {
-  const { nameProject, teamSize, dateOfStart, budget, status } = req.body;
+  const { nameProject, teamSize, dateOfStart, budget, status, expense } =
+    req.body;
   if (
     nameProject == "" ||
     teamSize == "" ||
     dateOfStart == "" ||
     budget == "" ||
-    status == ""
+    status == "" ||
+    expense == ""
   ) {
     res.status(200).json({ status: false, message: "Không Được Để Trống" });
   } else {
@@ -17,6 +19,7 @@ exports.addProject = (req, res, next) => {
       teamSize,
       dateOfStart,
       budget,
+      expense,
       status,
     });
     project
@@ -38,13 +41,34 @@ exports.addProject = (req, res, next) => {
   }
 };
 
+// exports.getProjects = async (req, res, next) => {
+//   const selectedValue = req.query.huydev;
+//   // console.log(selectedValue);
+//   let huydev;
+
+//   if (selectedValue) {
+//     huydev = await Task.findOne({ idProject: selectedValue }).populate([
+//       {
+//         path: "idProject",
+//       },
+//       {
+//         path: "assignedTo",
+//       },
+//     ]);
+//   } else {
+//     huydev = await Project.find({});
+//   }
+
+//   res.status(200).json(huydev);
+// };
+
 exports.getProjects = async (req, res, next) => {
   const selectedValue = req.query.huydev;
-  // console.log(selectedValue);
-  let huydev;
 
   if (selectedValue) {
-    huydev = await Task.findOne({ idProject: selectedValue }).populate([
+    const projectTasks = await Task.findOne({
+      idProject: selectedValue,
+    }).populate([
       {
         path: "idProject",
       },
@@ -52,11 +76,59 @@ exports.getProjects = async (req, res, next) => {
         path: "assignedTo",
       },
     ]);
-  } else {
-    huydev = await Project.find({});
-  }
 
-  res.status(200).json(huydev);
+    const projectTasksArray = await Task.find({
+      idProject: selectedValue,
+      assignedTo: { $ne: null },
+    });
+
+    const projectUsersMap = new Map(); // Sử dụng Map để lưu trữ thông tin dự án và danh sách người dùng tương ứng
+    // tim task co status dang xu ly
+    const processingTasks = projectTasksArray.filter(
+      (task) => task.status === "processing"
+    );
+
+    const completeTasks = projectTasksArray.filter(
+      (task) => task.status === "complete"
+    );
+
+    // console.log(processingTasks);
+
+    // lap de lay du lieu
+
+    projectTasksArray.forEach((task) => {
+      const projectId = task.idProject.toString();
+      const userId = task.assignedTo.toString();
+
+      if (projectUsersMap.has(projectId)) {
+        // Dự án đã tồn tại trong Map
+        const users = projectUsersMap.get(projectId);
+        // console.log(users);
+        if (!users.includes(userId)) {
+          // Người dùng chưa tồn tại trong danh sách người dùng của dự án
+          users.push(userId);
+        }
+      } else {
+        // Dự án chưa tồn tại trong Map, thêm dự án và người dùng vào Map
+        projectUsersMap.set(projectId, [userId]);
+      }
+    });
+    // console.log(projectUsersMap);
+    const projectUsersCount = Array.from(projectUsersMap.values()).map(
+      (users) => users.length
+    )[0];
+
+
+    res.status(200).json({
+      projectTasks,
+      totalUsers: projectUsersCount,
+      processingTasks: processingTasks.length,
+      completeTasks: completeTasks.length,
+    });
+  } else {
+    const huydev = await Project.find({});
+    res.status(200).json(huydev);
+  }
 };
 
 exports.getIdProject = async (req, res, next) => {
@@ -71,7 +143,7 @@ exports.getIdProject = async (req, res, next) => {
 
 exports.putProject = async (req, res, next) => {
   const _id = req.params.id;
-  const { nameProject, teamSize, dateOfStart, budget, status } = req.body;
+  const { nameProject, teamSize, dateOfStart, budget, status ,expense  } = req.body;
   Project.findById(_id)
     .then((huyit) => {
       huyit.nameProject = nameProject;
@@ -79,6 +151,7 @@ exports.putProject = async (req, res, next) => {
       huyit.dateOfStart = dateOfStart;
       huyit.budget = budget;
       huyit.status = status;
+      huyit.expense = expense;
 
       return huyit.save();
     })

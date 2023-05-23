@@ -122,6 +122,7 @@ exports.verifyAccessToken = async (req, res, next) => {
 };
 
 exports.getUsers = async (req, res, next) => {
-  const users = await User.find({});
+  const users = await User.find({}).populate(["area"]);
+
   res.status(200).json(users);
 };

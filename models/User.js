@@ -22,6 +22,11 @@ const postSchema = new Schema(
       enum: ["leader", "employee"],
       default: "employee",
     },
+    status: {
+      type: String,
+      enum: ["Online", "Office"],
+      default: "Online",
+    },
   },
   {
     timestamps: true,
