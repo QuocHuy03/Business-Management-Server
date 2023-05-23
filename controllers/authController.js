@@ -36,18 +36,23 @@ exports.register = async (req, res, next) => {
         },
       };
 
-      jwt.sign(payload, "LeQuocHuy", { expiresIn: 3600 }, (err, token) => {
-        if (err) {
-          return res
-            .status(200)
-            .json({ status: false, message: "Lỗi Nghiêm Trọng" });
-        }
+      jwt.sign(
+        payload,
+        "access_token_secret",
+        { expiresIn: 3600 },
+        (err, token) => {
+          if (err) {
+            return res
+              .status(200)
+              .json({ status: false, message: "Lỗi Nghiêm Trọng" });
+          }
 
-        res.status(200).json({
-          status: true,
-          message: "Đăng ký thành công",
-        });
-      });
+          res.status(200).json({
+            status: true,
+            message: "Đăng ký thành công",
+          });
+        }
+      );
     } catch (err) {
       return res
         .status(200)
@@ -78,7 +83,7 @@ exports.login = async (req, res, next) => {
         .json({ status: false, message: "Mật khẩu không đúng" });
     }
     const userArea = await User.find({}).populate("area", "nameArea");
-    console.log(userArea);
+    // console.log(userArea);
     const payload = {
       user: {
         id: user._id,
@@ -88,18 +93,18 @@ exports.login = async (req, res, next) => {
         level: user.level,
       },
     };
-
-    jwt.sign(payload, "LeQuocHuy", { expiresIn: "7200" }, (err, token) => {
-      if (err) {
-        return res
-          .status(200)
-          .json({ status: false, message: "Lỗi Nghiêm Trọng" });
-      }
-      res.status(200).json({
-        status: true,
-        message: "Đăng nhập thành công",
-        accessToken: token,
-      });
+    const accessToken = jwt.sign(payload, "access_token_secret", {
+      expiresIn: "15m",
+    });
+    // Tạo mã refresh token
+    const refreshToken = jwt.sign(payload, "refresh_token_secret", {
+      expiresIn: "7d",
+    });
+    res.status(200).json({
+      status: true,
+      message: "Đăng nhập thành công",
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   } catch (err) {
     return res
@@ -110,7 +115,7 @@ exports.login = async (req, res, next) => {
 
 exports.verifyAccessToken = async (req, res, next) => {
   const accessToken = req.headers.authorization.split(" ")[1];
-  jwt.verify(accessToken, "LeQuocHuy", (err, decoded) => {
+  jwt.verify(accessToken, "access_token_secret", (err, decoded) => {
     if (err) {
       res.status(401).json({ message: "Unauthorized" });
     } else {
@@ -136,10 +141,38 @@ exports.getInfoUser = async (req, res, next) => {
     throw new Error("Failed to decode access token");
   }
 };
+const validRefreshTokens = [];
+exports.refreshToken = async (req, res, next) => {
+  const refreshToken = req.body.refreshToken;
+  // console.log(accessToken);
+  try {
+    // Xác thực refresh token
+    const decoded = jwt.verify(refreshToken, "refresh_token_secret");
+
+    // Kiểm tra tính hợp lệ của refresh token
+    const isValidToken = validRefreshTokens.includes(refreshToken);
+
+    if (!isValidToken) {
+      throw new Error("Invalid refresh token");
+    }
+    // Tạo mã access token mới
+    const accessToken = jwt.sign(
+      { user: decoded.user },
+      "access_token_secret",
+      { expiresIn: "15m" }
+    );
+
+    // Gửi access token mới về cho người dùng
+    res.json({ accessToken });
+  } catch (error) {
+    // Xử lý lỗi refresh token
+    res.status(401).json({ message: "Invalid refresh token" });
+  }
+};
 
 exports.updateUser = async (req, res, next) => {
   const accessToken = req.headers.authorization.split(" ")[1];
-  console.log(req.body);
+  // console.log(req.body);
   try {
     const decodedToken = jwt.decode(accessToken);
     const userId = decodedToken.user.id;
