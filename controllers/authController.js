@@ -123,6 +123,34 @@ exports.verifyAccessToken = async (req, res, next) => {
 
 exports.getUsers = async (req, res, next) => {
   const users = await User.find({}).populate(["area"]);
-
   res.status(200).json(users);
+};
+
+exports.getInfoUser = async (req, res, next) => {
+  const accessToken = req.headers.authorization.split(" ")[1];
+  // console.log(accessToken);
+  try {
+    const decodedToken = jwt.decode(accessToken);
+    res.json(decodedToken.user);
+  } catch (error) {
+    throw new Error("Failed to decode access token");
+  }
+};
+
+exports.updateUser = async (req, res, next) => {
+  const accessToken = req.headers.authorization.split(" ")[1];
+  console.log(req.body);
+  try {
+    const decodedToken = jwt.decode(accessToken);
+    const userId = decodedToken.user.id;
+    // console.log(userId)
+    await User.findByIdAndUpdate(userId, {
+      username: req.body.username,
+      email: req.body.email,
+      level: req.body.level,
+    });
+    res.status(200).json({ message: "Update successfully" });
+  } catch (error) {
+    throw new Error("Failed to decode access token");
+  }
 };

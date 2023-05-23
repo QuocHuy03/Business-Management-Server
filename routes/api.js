@@ -22,6 +22,8 @@ router.delete("/deleteTask/:id", taskController.deleteTask);
 
 router.get("/verifyAccessToken", authController.verifyAccessToken);
 router.get("/getUsers", authController.getUsers);
+router.get("/user", authController.getInfoUser);
+router.put("/updateUser", authController.updateUser);
 
 router.post("/addArea", areaController.addArea);
 router.get("/getAreas", areaController.getAreas);
