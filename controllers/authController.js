@@ -94,7 +94,7 @@ exports.login = async (req, res, next) => {
       },
     };
     const accessToken = jwt.sign(payload, "access_token_secret", {
-      expiresIn: "15m",
+      expiresIn: "10m",
     });
     // Tạo mã refresh token
     const refreshToken = jwt.sign(payload, "refresh_token_secret", {
@@ -141,31 +141,19 @@ exports.getInfoUser = async (req, res, next) => {
     throw new Error("Failed to decode access token");
   }
 };
-const validRefreshTokens = [];
 exports.refreshToken = async (req, res, next) => {
   const refreshToken = req.body.refreshToken;
-  // console.log(accessToken);
   try {
-    // Xác thực refresh token
     const decoded = jwt.verify(refreshToken, "refresh_token_secret");
 
-    // Kiểm tra tính hợp lệ của refresh token
-    const isValidToken = validRefreshTokens.includes(refreshToken);
-
-    if (!isValidToken) {
-      throw new Error("Invalid refresh token");
-    }
     // Tạo mã access token mới
     const accessToken = jwt.sign(
       { user: decoded.user },
       "access_token_secret",
       { expiresIn: "15m" }
     );
-
-    // Gửi access token mới về cho người dùng
     res.json({ accessToken });
   } catch (error) {
-    // Xử lý lỗi refresh token
     res.status(401).json({ message: "Invalid refresh token" });
   }
 };

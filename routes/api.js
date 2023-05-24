@@ -9,39 +9,39 @@ const verifyAccessToken = require("../middleware/verifyAcessToken");
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 
-router.post("/addProject", projectController.addProject);
-router.get("/getProjects", projectController.getProjects);
+router.post("/addProject", verifyAccessToken, projectController.addProject);
+router.get("/getProjects", verifyAccessToken, projectController.getProjects);
 router.get(
   "/getIDProject/:id",
-
+  verifyAccessToken,
   projectController.getIdProject
 );
 router.put(
   "/updateProject/:id",
-
+  verifyAccessToken,
   projectController.putProject
 );
 router.delete(
   "/deleteProject/:id",
-
+  verifyAccessToken,
   projectController.deleteProject
 );
 
-router.post("/addTask", taskController.addTask);
-router.get("/getTasks", taskController.getTasks);
-router.get("/getIDTask/:id", taskController.getIdTask);
-router.put("/updateTask/:id", taskController.putTask);
-router.delete("/deleteTask/:id", taskController.deleteTask);
+router.post("/addTask", verifyAccessToken, taskController.addTask);
+router.get("/getTasks", verifyAccessToken, taskController.getTasks);
+router.get("/getIDTask/:id", verifyAccessToken, taskController.getIdTask);
+router.put("/updateTask/:id", verifyAccessToken, taskController.putTask);
+router.delete("/deleteTask/:id", verifyAccessToken, taskController.deleteTask);
 
 router.get("/verifyAccessToken", authController.verifyAccessToken);
 router.post("/refreshToken", authController.refreshToken);
 router.get("/getUsers", authController.getUsers);
-router.get("/user", verifyAccessToken, authController.getInfoUser);
+router.get("/user", authController.getInfoUser);
 router.put("/updateUser", verifyAccessToken, authController.updateUser);
 
-router.post("/addArea", areaController.addArea);
-router.get("/getAreas", areaController.getAreas);
-router.put("/updateArea/:id", areaController.putArea);
-router.delete("/deleteArea/:id", areaController.deleteArea);
+router.post("/addArea", verifyAccessToken, areaController.addArea);
+router.get("/getAreas", verifyAccessToken, areaController.getAreas);
+router.put("/updateArea/:id", verifyAccessToken, areaController.putArea);
+router.delete("/deleteArea/:id", verifyAccessToken, areaController.deleteArea);
 
 module.exports = router;
