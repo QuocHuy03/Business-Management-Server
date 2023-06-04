@@ -38,7 +38,7 @@ exports.putArea = async (req, res, next) => {
     .then((result) => {
       res.status(200).json({
         status: true,
-        message: "Cập Nhật Area Thành Công",
+        message: "Cập Nhật Khu Vực Thành Công",
       });
     })
     .catch((err) => {
@@ -56,7 +56,7 @@ exports.deleteArea = (req, res, next) => {
       if (post.deletedCount > 0) {
         res
           .status(200)
-          .json({ status: true, message: "Xóa Area Thành Công" });
+          .json({ status: true, message: "Xóa Khu Vực Thành Công" });
       } else {
         const error = new Error("Không tìm thấy danh mục này");
         error.statusCode = 404;

@@ -5,6 +5,7 @@ const projectController = require("../controllers/projectController");
 const taskController = require("../controllers/taskController");
 const areaController = require("../controllers/areaController");
 const verifyAccessToken = require("../middleware/verifyAcessToken");
+const userController = require("../controllers/userController");
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
@@ -40,8 +41,10 @@ router.get("/user", authController.getInfoUser);
 router.put("/updateUser", verifyAccessToken, authController.updateUser);
 
 router.post("/addArea", verifyAccessToken, areaController.addArea);
-router.get("/getAreas", verifyAccessToken, areaController.getAreas);
+router.get("/getAreas", areaController.getAreas);
 router.put("/updateArea/:id", verifyAccessToken, areaController.putArea);
 router.delete("/deleteArea/:id", verifyAccessToken, areaController.deleteArea);
 
+
+router.put("/updateUser/:id", verifyAccessToken, userController.updateUser);
 module.exports = router;
