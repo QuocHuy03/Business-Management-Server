@@ -23,8 +23,29 @@ exports.addArea = (req, res, next) => {
 };
 
 exports.getAreas = async (req, res, next) => {
-  const areas = await Area.find({});
-  res.status(200).json(areas);
+  if (req.query.page && req.query.limit) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const totalUser = await Area.countDocuments();
+      const areas = await Area.find({}).skip(skip).limit(limit);
+
+      res.status(200).json({
+        areas,
+        currentPage: page,
+        totalPages: Math.ceil(totalUser / limit),
+        totalItems: totalUser,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  } else {
+    const areas = await Area.find({});
+    res.status(200).json(areas);
+  }
 };
 
 exports.putArea = async (req, res, next) => {
