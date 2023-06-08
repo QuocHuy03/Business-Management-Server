@@ -41,16 +41,44 @@ exports.addTask = (req, res, next) => {
 };
 
 exports.getTasks = async (req, res, next) => {
-  try {
-    const tasks = await Task.find({})
-      .populate("idProject", "nameProject")
-      .populate("assignedTo", "username");
-    res.status(200).json(tasks);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+  if (req.query.page && req.query.limit) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const totalTasks = await Task.countDocuments(); // Tổng số task
+
+      const tasks = await Task.find({})
+        .populate("idProject", "nameProject")
+        .populate("assignedTo", "username")
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({
+        tasks,
+        currentPage: page,
+        totalPages: Math.ceil(totalTasks / limit),
+        totalItems: totalTasks,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  } else {
+    console.log("oke")
+    try {
+      const tasks = await Task.find({})
+        .populate("idProject", "nameProject")
+        .populate("assignedTo", "username");
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   }
 };
+
 
 exports.getIdTask = async (req, res, next) => {
   try {
