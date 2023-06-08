@@ -62,10 +62,10 @@ exports.addProject = (req, res, next) => {
 //   res.status(200).json(huydev);
 // };
 
-exports.getProjects = async (req, res, next) => {
-  const selectedValue = req.query.huydev;
 
-  if (selectedValue) {
+exports.getProjects = async (req, res, next) => {
+  if (req.query.huydev) {
+    const selectedValue = req.query.huydev;
     const projectTasks = await Task.findOne({
       idProject: selectedValue,
     }).populate([
@@ -118,13 +118,31 @@ exports.getProjects = async (req, res, next) => {
       (users) => users.length
     )[0];
 
-
     res.status(200).json({
       projectTasks,
       totalUsers: projectUsersCount,
       processingTasks: processingTasks.length,
       completeTasks: completeTasks.length,
     });
+  } else if (req.query.page && req.query.limit) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const totalProject = await Project.countDocuments(); // Tổng số task
+      const projects = await Project.find({}).skip(skip).limit(limit);
+
+      res.status(200).json({
+        projects,
+        currentPage: page,
+        totalPages: Math.ceil(totalProject / limit),
+        totalItems: totalProject,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   } else {
     const huydev = await Project.find({});
     res.status(200).json(huydev);
