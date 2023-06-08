@@ -127,9 +127,34 @@ exports.verifyAccessToken = async (req, res, next) => {
 };
 
 exports.getUsers = async (req, res, next) => {
-  const users = await User.find({}).populate(["area"]);
-  res.status(200).json(users);
+  if (req.query.page && req.query.limit) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const totalUser = await User.countDocuments();
+      const users = await User.find({})
+        .populate(["area"])
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({
+        users,
+        currentPage: page,
+        totalPages: Math.ceil(totalUser / limit),
+        totalItems: totalUser,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  } else {
+    const users = await User.find({}).populate(["area"]);
+    res.status(200).json(users);
+  }
 };
+
 
 exports.getInfoUser = async (req, res, next) => {
   const accessToken = req.headers.authorization.split(" ")[1];
