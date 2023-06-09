@@ -41,7 +41,35 @@ exports.addTask = (req, res, next) => {
 };
 
 exports.getTasks = async (req, res, next) => {
-  if (req.query.page && req.query.limit) {
+  if (req.query._id && req.query.page && req.query.limit) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const totalTasks = await Task.countDocuments({
+        assignedTo: req.query.idUser,
+      }); // Tổng số task
+
+      const tasks = await Task.find({ assignedTo: req.query._id })
+        .populate("idProject", "nameProject")
+        .populate("assignedTo", "username")
+        .skip(skip)
+        .limit(limit);
+
+      // console.log("Task : ",tasks);
+
+      res.status(200).json({
+        tasks,
+        currentPage: page,
+        totalPages: Math.ceil(totalTasks / limit),
+        totalItems: totalTasks,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  } else if (req.query.page && req.query.limit) {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
@@ -66,7 +94,6 @@ exports.getTasks = async (req, res, next) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   } else {
-    console.log("oke")
     try {
       const tasks = await Task.find({})
         .populate("idProject", "nameProject")
@@ -78,7 +105,6 @@ exports.getTasks = async (req, res, next) => {
     }
   }
 };
-
 
 exports.getIdTask = async (req, res, next) => {
   try {
