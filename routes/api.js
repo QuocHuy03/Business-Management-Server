@@ -47,4 +47,5 @@ router.delete("/deleteArea/:id", verifyAccessToken, areaController.deleteArea);
 
 
 router.put("/updateUser/:id", verifyAccessToken, userController.updateUser);
+router.get("/getUserId/:username", verifyAccessToken, userController.getUserId);
 module.exports = router;
