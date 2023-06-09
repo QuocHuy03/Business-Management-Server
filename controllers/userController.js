@@ -1,5 +1,14 @@
 const User = require("../models/User");
 
+exports.getUserId = async (req, res, next) => {
+  try {
+    const userId = await User.findOne({ username:  req.params.username });
+    res.status(200).json(userId);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 exports.updateUser = async (req, res, next) => {
   const _id = req.params.id;
   const { level, status } = req.body;
