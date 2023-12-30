@@ -5,12 +5,12 @@ exports.addTask = (req, res, next) => {
   const { taskName, description, idProject, priority, assignedTo, status } =
     req.body;
   if (
-    taskName == "" ||
-    description == "" ||
-    idProject == "" ||
-    priority == "" ||
-    assignedTo == "" ||
-    status == ""
+    !taskName ||
+    !description ||
+    !idProject ||
+    !priority ||
+    !assignedTo ||
+    !status
   ) {
     res.status(200).json({ status: false, message: "Không Được Để Trống" });
   } else {
