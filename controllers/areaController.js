@@ -2,7 +2,7 @@ const Area = require("../models/Area");
 
 exports.addArea = (req, res, next) => {
   const { nameArea } = req.body;
-  if (nameArea == "") {
+  if (!nameArea) {
     res.status(200).json({ status: false, message: "Không Được Để Trống" });
   } else {
     const area = new Area({
