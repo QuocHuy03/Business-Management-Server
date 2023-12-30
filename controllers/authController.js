@@ -4,7 +4,7 @@ const User = require("../models/User");
 
 exports.register = async (req, res, next) => {
   const { username, email, password, area } = req.body;
-  if (username === "" || email === "" || password === "" || area === "") {
+  if (!username || !email || !password || !area) {
     return res
       .status(200)
       .json({ status: false, message: "Vui lòng nhập đầy đủ thông tin" });
@@ -65,51 +65,56 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   const { username, password } = req.body;
-
-  try {
-    const user = await User.findOne({ username: username });
-
-    if (!user) {
-      return res
-        .status(200)
-        .json({ status: false, message: "Username đăng nhập không tồn tại" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res
-        .status(200)
-        .json({ status: false, message: "Mật khẩu không đúng" });
-    }
-    const userArea = await User.find({}).populate("area", "nameArea");
-    // console.log(userArea);
-    const payload = {
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        area: userArea[0].area.nameArea,
-        level: user.level,
-      },
-    };
-    const accessToken = jwt.sign(payload, "access_token_secret", {
-      expiresIn: "10m",
-    });
-    // Tạo mã refresh token
-    const refreshToken = jwt.sign(payload, "refresh_token_secret", {
-      expiresIn: "7d",
-    });
-    res.status(200).json({
-      status: true,
-      message: "Đăng nhập thành công",
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    });
-  } catch (err) {
+  if (!username || !password) {
     return res
-      .status(500)
-      .json({ status: false, message: "Lỗi trong quá trình đăng nhập" });
+      .status(200)
+      .json({ status: false, message: "Vui lòng nhập đầy đủ thông tin" });
+  } else {
+    try {
+      const user = await User.findOne({ username: username });
+
+      if (!user) {
+        return res
+          .status(200)
+          .json({ status: false, message: "Username đăng nhập không tồn tại" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return res
+          .status(200)
+          .json({ status: false, message: "Mật khẩu không đúng" });
+      }
+      const userArea = await User.find({}).populate("area", "nameArea");
+      // console.log(userArea);
+      const payload = {
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          area: userArea[0].area.nameArea,
+          level: user.level,
+        },
+      };
+      const accessToken = jwt.sign(payload, "access_token_secret", {
+        expiresIn: "10m",
+      });
+      // Tạo mã refresh token
+      const refreshToken = jwt.sign(payload, "refresh_token_secret", {
+        expiresIn: "7d",
+      });
+      res.status(200).json({
+        status: true,
+        message: "Đăng nhập thành công",
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      });
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ status: false, message: "Lỗi trong quá trình đăng nhập" });
+    }
   }
 };
 
@@ -155,10 +160,8 @@ exports.getUsers = async (req, res, next) => {
   }
 };
 
-
 exports.getInfoUser = async (req, res, next) => {
   const accessToken = req.headers.authorization.split(" ")[1];
-  // console.log(accessToken);
   try {
     const decodedToken = jwt.decode(accessToken);
     res.json(decodedToken.user);
