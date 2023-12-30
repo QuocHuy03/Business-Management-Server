@@ -5,12 +5,12 @@ exports.addProject = (req, res, next) => {
   const { nameProject, teamSize, dateOfStart, budget, status, expense } =
     req.body;
   if (
-    nameProject == "" ||
-    teamSize == "" ||
-    dateOfStart == "" ||
-    budget == "" ||
-    status == "" ||
-    expense == ""
+    !nameProject ||
+    !teamSize ||
+    !dateOfStart ||
+    !budget ||
+    !status ||
+    !expense
   ) {
     res.status(200).json({ status: false, message: "Không Được Để Trống" });
   } else {
@@ -61,7 +61,6 @@ exports.addProject = (req, res, next) => {
 
 //   res.status(200).json(huydev);
 // };
-
 
 exports.getProjects = async (req, res, next) => {
   if (req.query.huydev) {
@@ -161,7 +160,8 @@ exports.getIdProject = async (req, res, next) => {
 
 exports.putProject = async (req, res, next) => {
   const _id = req.params.id;
-  const { nameProject, teamSize, dateOfStart, budget, status ,expense  } = req.body;
+  const { nameProject, teamSize, dateOfStart, budget, status, expense } =
+    req.body;
   Project.findById(_id)
     .then((huyit) => {
       huyit.nameProject = nameProject;
